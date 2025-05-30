@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "searxng_search"
+version = "0.1.0"
+authors = [
+  { name="JamePeng", email="jame_peng@sina.com" },
+]
+description = "A Python client for interacting with local/LAN SearXNG instances."
+
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT License" }
+keywords = ["searxng", "search-engine", "local", "lan", "client","python"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+]
+dependencies = [
+    "httpx>=0.23.0",
+    "lxml>=4.9.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/JamePeng/searxng_search"
+"Bug Tracker" = "https://github.com/JamePeng/searxng_search/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
