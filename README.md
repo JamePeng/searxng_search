@@ -1,4 +1,4 @@
-# searxng-search
+# searxng_search
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -23,9 +23,9 @@ A Python client library crafted by **JamePeng (jame_peng@sina.com)** for seamles
 * **Python 3.8+**: Ensure you have a compatible Python version installed.
 * **Docker & Docker Compose**: (Recommended for setting up SearXNG) Make sure Docker and Docker Compose are installed on your system.
 
-### Install the `searxng-search` Library
+### Install the `searxng_search` Library
 
-You can install `searxng-search`  by building it from source.
+You can install `searxng_search`  by building it from source.
 
 
 #### From Source
@@ -33,8 +33,8 @@ You can install `searxng-search`  by building it from source.
 Clone the repository (or create the project structure):
 
 ```bash
-git clone https://github.com/jamepeng/searxng-search.git
-cd searxng-search
+git clone https://github.com/jamepeng/searxng_search.git
+cd searxng_search
 ```
 
 Alternatively, manually create the following directory structure and files within your project root:
@@ -72,7 +72,7 @@ pip install ./dist/searxng_search-0.1.0-py3-none-any.whl
 
 ### Setting up SearXNG with Docker (Recommended)
 
-Before using `searxng-search`, you'll need a running SearXNG instance. This setup uses `searxng-docker`'s recommended `docker-compose.yaml` with Caddy as a reverse proxy, suitable for both local and external (LAN/public) access.
+Before using `searxng_search`, you'll need a running SearXNG instance. This setup uses `searxng-docker`'s recommended `docker-compose.yaml` with Caddy as a reverse proxy, suitable for both local and external (LAN/public) access.
 
 Clone the `searxng-docker` repository:
 
@@ -208,7 +208,7 @@ You should see the SearXNG search interface.
 
 ## Usage Examples
 
-Here's how you can use the `searxng-search` library in your Python code:
+Here's how you can use the `searxng_search` library in your Python code:
 
 ```python
 import logging
