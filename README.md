@@ -59,16 +59,10 @@ Install build tools:
 pip install build wheel setuptools
 ```
 
-Build the package:
+Build and Install:
 
 ```bash
-python -m build
-```
-
-Install the generated wheel file:
-
-```bash
-pip install ./dist/searxng_search-0.1.0-py3-none-any.whl
+pip install .
 ```
 
 ### Setting up SearXNG with Docker (Recommended)
@@ -212,8 +206,9 @@ You should see the SearXNG search interface.
 Here's how you can use the `searxng_search` library in your Python code:
 
 ```python
-import logging
-from searxng_search import SearXNGSearch, RequestException, ParsingException, SearXNGSearchException
+from searxng_search.searxng_search import SearXNGSearch
+from searxng_search.exceptions import RequestException, ParsingException, SearXNGSearchException
+
 
 # Configure logging for better visibility
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -224,18 +219,18 @@ logger = logging.getLogger(__name__)
 # If you set SEARXNG_HOSTNAME=localhost, use http://localhost or https://localhost (if internal TLS is enabled)
 # If you set SEARXNG_HOSTNAME=your.lan.ip.address, use [http://your.lan.ip.address](http://your.lan.ip.address) or [https://your.lan.ip.address](https://your.lan.ip.address)
 # If you set SEARXNG_HOSTNAME=your.domain.com, use [https://your.domain.com](https://your.domain.com)
-SEARXNG_BASE_URL = "http://localhost" # <-- ADJUST THIS BASED ON YOUR CADDY/SEARXNG_HOSTNAME SETTING!
+SEARXNG_BASE_URL = "http://localhost:8080" # <-- ADJUST THIS BASED ON YOUR CADDY/SEARXNG_HOSTNAME SETTING!
 
-def perform_text_search(keywords: str):
+def perform_text_search(keywords: str, language: str = "en-US"):
     """Demonstrates performing a text search with error handling."""
     logger.info(f"Performing text search for: '{keywords}' on {SEARXNG_BASE_URL}")
 
     # Use 'verify=False' if you're using Caddy's 'internal' TLS for localhost or LAN IP
     # and Python can't verify the self-signed certificate. For production with valid certs, keep 'True'.
-    with SearXNGSearch(base_url=SEARXNG_BASE_URL, timeout=60, verify=True) as client:
+    with SearXNGSearch(base_url=SEARXNG_BASE_URL, timeout=20, verify=False) as client:
         try:
-            # Perform a general text search, requesting JSON format, limit to 5 results
-            results = client.text(keywords, category="general", format="json", max_results=5)
+            # Perform a general text search, requesting JSON format, limit to 8 results
+            results = client.text(keywords, category="general", language=language, format="json", max_results=8)
 
             if results:
                 logger.info(f"Successfully retrieved {len(results)} results for '{keywords}':")
@@ -243,7 +238,7 @@ def perform_text_search(keywords: str):
                     logger.info(f"  Result {i+1}:")
                     logger.info(f"    Title: {result.get('title', 'N/A')}")
                     logger.info(f"    URL:   {result.get('href', 'N/A')}")
-                    logger.info(f"    Body:  {result.get('body', 'N/A')[:100]}...") # Truncate body for display
+                    logger.info(f"    Body:  {result.get('body', 'N/A')}...")
             else:
                 logger.info(f"No results found for '{keywords}'.")
 
@@ -260,8 +255,8 @@ def perform_text_search(keywords: str):
     print("-" * 50) # Separator for clarity
 
 if __name__ == "__main__":
-    perform_text_search("Python programming best practices")
-    perform_text_search("latest AI advancements 2025")
+    perform_text_search("Python programming best practices", language="en-US")
+    perform_text_search("MCP是什么？", language="zh-CN")
     perform_text_search("nonexistent query xyz123") # Example for no results
     perform_text_search("") # Example for ValueError
 ```
