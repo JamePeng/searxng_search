@@ -119,7 +119,8 @@ class SearXNGSearch:
             RequestException: Raised for HTTP request errors.
             ParsingException: Raised when parsing SearXNG's response fails.
         """
-        assert keywords, "keywords is mandatory"
+        if not keywords.strip():
+            raise ValueError("The 'keywords' argument is mandatory and cannot be empty.")
 
         params = {
             "q": keywords,
