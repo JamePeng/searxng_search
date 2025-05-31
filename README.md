@@ -20,7 +20,7 @@ A Python client library crafted by **JamePeng (jame_peng@sina.com)** for seamles
 
 ### Prerequisites
 
-* **Python 3.8+**: Ensure you have a compatible Python version installed.
+* **Python 3.9+**: Ensure you have a compatible Python version installed.
 * **Docker & Docker Compose**: (Recommended for setting up SearXNG) Make sure Docker and Docker Compose are installed on your system.
 
 ### Install the `searxng_search` Library
