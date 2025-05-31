@@ -132,7 +132,7 @@ class SearXNGSearch:
         results: list[dict[str, str]] = []
 
         try:
-            resp = self._get_url("GET", "/search", params=params)
+            resp = self._get_url("POST", "/search", params=params)
 
             if format == "json":
                 data = json_loads(resp.content)
