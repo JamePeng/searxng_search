@@ -46,6 +46,7 @@ searxng_search_package/
 │   ├── searxng_search.py
 │   ├── exceptions.py
 │   └── utils.py
+├── .gitignore
 ├── pyproject.toml
 ├── CHANGELOG.md
 └── README.md

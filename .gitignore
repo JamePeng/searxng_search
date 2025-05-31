@@ -1,0 +1,42 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Distributions
+dist/
+build/
+*.egg
+
+# Python installer issues
+*.env
+.venv/
+venv/
+env/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.bak
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Docker files
+.docker/
+docker-compose.override.yaml # If you use one for local dev that shouldn't be committed
+.env # Contains sensitive environment variables for Docker or Python
+
+# Test / Coverage
+.coverage
+htmlcov/
+.nox/
+
+# Logs
+*.log
