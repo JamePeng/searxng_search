@@ -12,11 +12,11 @@ description = "A Python client for interacting with local/LAN SearXNG instances.
 
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "MIT License" }
+license = "MIT"
+license-files = ["LICEN[CS]E.*"]
 keywords = ["searxng", "search-engine", "local", "lan", "client","python"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
 ]
