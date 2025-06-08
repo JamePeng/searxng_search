@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "searxng_search"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
   { name="JamePeng", email="jame_peng@sina.com" },
 ]

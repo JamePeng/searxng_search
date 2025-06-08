@@ -46,6 +46,8 @@ searxng_search_package/
 │   ├── searxng_search.py
 │   ├── exceptions.py
 │   └── utils.py
+├── test/
+│   ├── demo.py
 ├── .gitignore
 ├── pyproject.toml
 ├── CHANGELOG.md
@@ -127,7 +129,7 @@ services:
       - searxng
     # Expose SearXNG's port only to the local machine, as Caddy will handle external access
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8080:8080" # Or just 8080:8080
     volumes:
       # Mount a volume for SearXNG's settings.yml.
       # You might want to copy a default settings.yml from the container first.
@@ -209,6 +211,7 @@ Here's how you can use the `searxng_search` library in your Python code:
 from searxng_search.searxng_search import SearXNGSearch
 from searxng_search.exceptions import RequestException, ParsingException, SearXNGSearchException
 
+import logging
 
 # Configure logging for better visibility
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -227,7 +230,7 @@ def perform_text_search(keywords: str, language: str = "en-US"):
 
     # Use 'verify=False' if you're using Caddy's 'internal' TLS for localhost or LAN IP
     # and Python can't verify the self-signed certificate. For production with valid certs, keep 'True'.
-    with SearXNGSearch(base_url=SEARXNG_BASE_URL, timeout=20, verify=False) as client:
+    with SearXNGSearch(base_url=SEARXNG_BASE_URL, timeout=20, verify=False, retries=3, backoff_factor=0.1) as client:
         try:
             # Perform a general text search, requesting JSON format, limit to 8 results
             results = client.text(keywords, category="general", language=language, format="json", max_results=8)
@@ -259,13 +262,14 @@ if __name__ == "__main__":
     perform_text_search("MCP是什么？", language="zh-CN")
     perform_text_search("nonexistent query xyz123") # Example for no results
     perform_text_search("") # Example for ValueError
+
 ```
 
 -----
 
 ## API Reference (Planned)
 
-### `SearXNGSearch(base_url: str, headers: dict | None = None, timeout: int | None = 30, verify: bool = True)`
+### `SearXNGSearch(base_url: str, headers: dict | None = None, timeout: int | None = 30, verify: bool = True, retries: int = 3, backoff_factor: float = 0.5)`
 
 Initializes the client.
 
@@ -273,6 +277,8 @@ Initializes the client.
   * `headers` (`dict`, optional): Custom HTTP headers for requests.
   * `timeout` (`int`, optional): Request timeout in seconds. Defaults to 30.
   * `verify` (`bool`, optional): Whether to verify SSL certificates. Set to `False` for self-signed certificates (e.g., Caddy's internal TLS or custom certs) if you encounter SSL errors, but keep `True` for production with valid certificates. Defaults to `True`.
+  * `retries` (`int`, optional): Number of times to retry a failed HTTP request. Defaults to `3`.
+  * `backoff_factor` (`float`, optional): A factor by which to multiply the retry delay. The delay will be `backoff_factor * (2 ** (retry_count - 1))`. Defaults to `0.5`.
 
 ### `SearXNGSearch.text(keywords: str, category: str = "general", language: str = "en-US", pageno: int = 1, format: Literal["json", "html"] = "json", max_results: int | None = None) -> list[dict[str, str]]`
 

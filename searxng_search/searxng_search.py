@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Literal
-import warnings
+import time
 
 import httpx
 from lxml.html import HTMLParser as LHTMLParser
@@ -25,6 +25,8 @@ class SearXNGSearch:
         headers: dict[str, str] | None = None,
         timeout: int | None = 30, # Increased timeout for potential network latency
         verify: bool = True,
+        retries: int = 3, # retries: Number of retry attempts for failed requests
+        backoff_factor: float = 0.5, # backoff_factor: Factor for exponential backoff delay
     ) -> None:
         """
         Initialize the SearXNGSearch object.
@@ -34,13 +36,19 @@ class SearXNGSearch:
             headers (dict, optional): Dictionary of headers for the HTTP client. Defaults to None.
             timeout (int, optional): Timeout value for the HTTP client in seconds. Defaults to 30.
             verify (bool): SSL verification when making the request. Defaults to True.
+            retries (int): Number of times to retry a failed HTTP request. Defaults to 3.
+            backoff_factor (float): A factor by which to multiply the retry delay. The delay will be
+                                    `backoff_factor * (2 ** (retry_count - 1))`. Defaults to 0.5.
         """
+
         if not base_url.endswith('/'):
             base_url += '/'
         self.base_url = base_url
         self.headers = headers if headers else {}
         self.headers["User-Agent"] = "SearXNG-Search-Client/1.0" # Custom User-Agent
         self.timeout = timeout
+        self.retries = retries
+        self.backoff_factor = backoff_factor
         self.client = httpx.Client(
             headers=self.headers,
             timeout=self.timeout,
@@ -61,7 +69,7 @@ class SearXNGSearch:
 
     def _get_url(
         self,
-        method: Literal["GET", "POST"],
+        method: Literal["POST", "GET"],
         path: str,
         params: dict[str, str] | None = None,
         data: dict[str, str] | None = None,
@@ -70,26 +78,41 @@ class SearXNGSearch:
     ) -> httpx.Response:
         """Helper to make HTTP requests to the SearXNG instance."""
         url = self.base_url + path.lstrip('/')
-        try:
-            resp = self.client.request(
-                method,
-                url,
-                params=params,
-                data=data,
-                json=json,
-                headers=headers,
-            )
-            resp.raise_for_status() # Raise an exception for 4xx/5xx responses
-            return resp
-        except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error for {url}: {e.response.status_code} - {e.response.text}")
-            raise RequestException(f"HTTP error: {e.response.status_code} for {url}") from e
-        except httpx.RequestError as e:
-            logger.error(f"Request error for {url}: {e}")
-            raise RequestException(f"Request failed for {url}") from e
-        except Exception as e:
-            logger.error(f"An unexpected error occurred for {url}: {e}")
-            raise SearXNGSearchException(f"Unexpected error: {e}") from e
+        for attempt in range(self.retries + 1): # +1 to include the initial attempt
+            try:
+                resp = self.client.request(
+                    method,
+                    url,
+                    params=params,
+                    data=data,
+                    json=json,
+                    headers=headers,
+                )
+                resp.raise_for_status() # Raise an exception for 4xx/5xx responses
+                return resp
+            except (httpx.HTTPStatusError, httpx.RequestError) as e:
+                # Log the error for the current attempt
+                if isinstance(e, httpx.HTTPStatusError):
+                    logger.warning(f"HTTP error (status {e.response.status_code}) for {url} (Attempt {attempt + 1}/{self.retries + 1}): {e.response.text}")
+                else:
+                    logger.warning(f"Request error for {url} (Attempt {attempt + 1}/{self.retries + 1}): {e}")
+
+                # If this is the last attempt, re-raise the exception
+                if attempt == self.retries:
+                    logger.error(f"All {self.retries + 1} attempts failed for {url}.")
+                    if isinstance(e, httpx.HTTPStatusError):
+                        raise RequestException(f"HTTP error: {e.response.status_code} for {url}") from e
+                    else:
+                        raise RequestException(f"Request failed for {url}") from e
+
+                # Calculate sleep time for next retry (exponential backoff)
+                sleep_time = self.backoff_factor * (2 ** attempt)
+                logger.info(f"Retrying {url} in {sleep_time:.2f} seconds...")
+                time.sleep(sleep_time)
+            except Exception as e:
+                # Catch any other unexpected exceptions immediately, no retry for these
+                logger.error(f"An unexpected error occurred for {url} during attempt {attempt + 1}: {e}")
+                raise SearXNGSearchException(f"Unexpected error: {e}") from e
 
     def text(
         self,

@@ -20,7 +20,7 @@ def perform_text_search(keywords: str, language: str = "en-US"):
 
     # Use 'verify=False' if you're using Caddy's 'internal' TLS for localhost or LAN IP
     # and Python can't verify the self-signed certificate. For production with valid certs, keep 'True'.
-    with SearXNGSearch(base_url=SEARXNG_BASE_URL, timeout=20, verify=False) as client:
+    with SearXNGSearch(base_url=SEARXNG_BASE_URL, timeout=20, verify=False, retries=3, backoff_factor=0.5) as client:
         try:
             # Perform a general text search, requesting JSON format, limit to 8 results
             results = client.text(keywords, category="general", language=language, format="json", max_results=8)
@@ -28,7 +28,6 @@ def perform_text_search(keywords: str, language: str = "en-US"):
             if results:
                 logger.info(f"Successfully retrieved {len(results)} results for '{keywords}':")
                 for i, result in enumerate(results):
-                    print(f"RESULT {i+1}: {result}")
                     logger.info(f"  Result {i+1}:")
                     logger.info(f"    Title: {result.get('title', 'N/A')}")
                     logger.info(f"    URL:   {result.get('href', 'N/A')}")
